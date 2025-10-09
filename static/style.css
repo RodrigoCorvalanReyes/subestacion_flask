@@ -1,0 +1,389 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+:root {
+    --bg-color: #1a1c20;
+    --primary-surface-color: #2b2d33;
+    --secondary-surface-color: #3c3f47;
+    --primary-accent-color: #0095d5;
+    --secondary-accent-color: #00bfff;
+    --text-color: #e1e1e1;
+    --text-secondary-color: #a0a0a0;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --error-color: #dc3545;
+    --font-family: 'Roboto', sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    background-color: var(--primary-surface-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+    border: 1px solid var(--secondary-surface-color);
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-accent-color);
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--secondary-surface-color);
+    padding-bottom: 1rem;
+}
+
+.controls, .event-controls {
+    background-color: var(--secondary-surface-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-weight: 400;
+    color: var(--text-secondary-color);
+    border-bottom: 1px solid #4a4d55;
+    padding-bottom: 0.5rem;
+}
+
+.interval-control {
+    margin-bottom: 1.5rem;
+}
+
+.interval-control label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary-color);
+}
+
+.interval-control input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background-color: #33363d;
+    color: var(--text-color);
+    box-sizing: border-box;
+}
+
+.control-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+button, select {
+    font-family: var(--font-family);
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background-color: #4a4d55;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+button:hover, select:hover {
+    border-color: var(--primary-accent-color);
+    background-color: #555860;
+}
+
+#start-sim {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+#start-sim:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+#stop-sim {
+    background-color: var(--error-color);
+    border-color: var(--error-color);
+}
+
+#stop-sim:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+#trigger-event {
+    width: 100%;
+    margin-top: 1rem;
+    background-color: var(--primary-accent-color);
+    border-color: var(--primary-accent-color);
+}
+
+#trigger-event:hover {
+    background-color: var(--secondary-accent-color);
+    border-color: var(--secondary-accent-color);
+}
+
+select {
+    width: 100%;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background-color: var(--secondary-surface-color);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+#sim-status-indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    transition: background-color 0.5s ease;
+}
+
+#sim-status-indicator.stopped {
+    background-color: var(--error-color);
+}
+
+#sim-status-indicator.running {
+    background-color: var(--success-color);
+}
+
+#sim-status-indicator.event {
+    background-color: var(--warning-color);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+.logs {
+    background-color: var(--bg-color);
+    border: 1px solid var(--secondary-surface-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.logs h2 {
+    color: var(--text-secondary-color);
+}
+
+#log-output {
+    height: 200px;
+    overflow-y: auto;
+    background-color: #111;
+    padding: 1rem;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: #ddd;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Estilos para el Gestor MQTT */
+.mqtt-manager {
+    background-color: var(--secondary-surface-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.mqtt-manager h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    color: var(--text-secondary-color);
+    border-bottom: 1px solid #4a4d55;
+    padding-bottom: 0.5rem;
+}
+
+.config-selector-wrapper {
+    margin-bottom: 1rem;
+}
+
+.config-selector-wrapper label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary-color);
+}
+
+.selector-with-button {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.selector-with-button select {
+    flex-grow: 1;
+}
+
+.delete-btn {
+    padding: 0.75rem;
+    flex-shrink: 0;
+    background-color: var(--error-color) !important;
+    border-color: var(--error-color) !important;
+    max-width: 50px;
+}
+
+.delete-btn:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+}
+
+.add-config-details summary {
+    cursor: pointer;
+    color: var(--primary-accent-color);
+    outline: none;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.add-config-details summary:hover {
+    background-color: #4a4d55;
+}
+
+.add-config-details[open] summary {
+    margin-bottom: 1.5rem;
+}
+
+#mqtt-form {
+    margin-top: 1rem;
+}
+
+#mqtt-form .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#mqtt-form input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background-color: #33363d;
+    color: var(--text-color);
+    box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
+}
+
+#mqtt-form input::placeholder {
+    color: #888;
+}
+
+#mqtt-form #note, 
+#mqtt-form #topic,
+#mqtt-form #username {
+    grid-column: 1 / -1; /* Ocupa todo el ancho */
+}
+
+#mqtt-form button {
+    width: 100%;
+    background-color: var(--primary-accent-color);
+    border-color: var(--primary-accent-color);
+    margin-top: 0.5rem;
+}
+
+#mqtt-form button:hover {
+    background-color: var(--secondary-accent-color);
+    border-color: var(--secondary-accent-color);
+}
+
+#scratchpad-area {
+    grid-column: 1 / -1; /* Ocupa todo el ancho del grid */
+    margin-top: 1rem;
+    height: 150px;
+    background-color: #111;
+    border: 1px solid var(--secondary-surface-color);
+    border-radius: 6px;
+    color: var(--text-color);
+    padding: 1rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+#scratchpad-area::placeholder {
+    color: #666;
+}
+
+/* Styling for the variable tables */
+.variable-table {
+    background-color: var(--secondary-surface-color);
+    border: 1px solid #4a4d55;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.variable-table h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #4a4d55;
+    padding-bottom: 0.5rem;
+    color: var(--text-secondary-color);
+}
+
+.variable-table details {
+    margin-top: 1rem;
+    border: 1px solid #4a4d55;
+    border-radius: 4px;
+    padding: 1rem;
+    background-color: var(--primary-surface-color);
+}
+
+.variable-table summary {
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--primary-accent-color);
+    padding: 0.5rem;
+}
+
+.variable-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.variable-table th, .variable-table td {
+    border: 1px solid #4a4d55;
+    padding: 0.75rem;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.variable-table th {
+    background-color: #3c3f47;
+}
+
+.variable-table code {
+    background-color: #1a1c20;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+}

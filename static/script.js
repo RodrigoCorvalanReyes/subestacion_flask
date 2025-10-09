@@ -1,0 +1,243 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Elementos del DOM ---
+    const startBtn = document.getElementById('start-sim');
+    const stopBtn = document.getElementById('stop-sim');
+    const triggerBtn = document.getElementById('trigger-event');
+    const eventSelector = document.getElementById('event-selector');
+    
+    const statusIndicator = document.getElementById('sim-status-indicator');
+    const statusText = document.getElementById('sim-status-text');
+    const logOutput = document.getElementById('log-output');
+
+    const mqttForm = document.getElementById('mqtt-form');
+    const configSelector = document.getElementById('config-selector');
+    const deleteConfigBtn = document.getElementById('delete-config');
+    const intervalInput = document.getElementById('interval-seconds');
+
+    const activeEventsList = document.getElementById('active-events-list');
+
+    // --- Mapa de Nombres de Eventos ---
+    const eventFriendlyNames = {
+        'cooling_fault': 'Falla de Refrigeración',
+        'c2h2_spike': 'Pico de Acetileno (Arco)',
+        'overload': 'Sobrecarga',
+        'fault': 'Falla del Cargador',
+        'flood': 'Inundación Detectada'
+    };
+
+    // --- Lógica de la Interfaz ---
+
+    function logMessage(message, type = 'info') {
+        const timestamp = `[${new Date().toLocaleTimeString()}]`;
+        const typePrefix = type.toUpperCase();
+        logOutput.textContent += `${timestamp} [${typePrefix}] ${message}
+`;
+        logOutput.scrollTop = logOutput.scrollHeight; // Auto-scroll
+    }
+
+    function updateUI(status) {
+        const { simulation_running, active_events } = status;
+
+        // Actualizar estado de los botones y controles
+        startBtn.disabled = simulation_running;
+        stopBtn.disabled = !simulation_running;
+        configSelector.disabled = simulation_running;
+        deleteConfigBtn.disabled = simulation_running;
+        intervalInput.disabled = simulation_running;
+        document.querySelector('.add-config-details summary').style.pointerEvents = simulation_running ? 'none' : 'auto';
+
+        // Contar eventos activos
+        let totalActiveEvents = 0;
+        Object.values(active_events).forEach(target_events => {
+            totalActiveEvents += Object.keys(target_events).length;
+        });
+
+        // Actualizar indicador de estado principal
+        if (simulation_running) {
+            if (totalActiveEvents > 0) {
+                statusIndicator.className = 'event';
+                statusText.textContent = `Estado: En ejecución (con ${totalActiveEvents} evento/s activo/s)`;
+            } else {
+                statusIndicator.className = 'running';
+                statusText.textContent = 'Estado: En ejecución (Operación Normal)';
+            }
+        } else {
+            statusIndicator.className = 'stopped';
+            statusText.textContent = 'Estado: Detenido';
+        }
+
+        // Actualizar lista de eventos activos
+        activeEventsList.innerHTML = '';
+        if (totalActiveEvents === 0) {
+            activeEventsList.innerHTML = '<li>Ninguno</li>';
+        } else {
+            for (const [target, events] of Object.entries(active_events)) {
+                for (const event_type of Object.keys(events)) {
+                    const friendlyName = eventFriendlyNames[event_type] || event_type;
+                    const li = document.createElement('li');
+                    li.textContent = `${target}: ${friendlyName}`;
+                    activeEventsList.appendChild(li);
+                }
+            }
+        }
+    }
+
+    async function fetchStatus() {
+        try {
+            const response = await fetch('/api/status');
+            if (!response.ok) throw new Error('No se pudo conectar con el servidor.');
+            const status = await response.json();
+            updateUI(status);
+        } catch (error) {
+            console.error('Error fetching status:', error);
+            // Si falla la conexión, mostrar estado detenido para evitar inconsistencias
+            updateUI({ simulation_running: false, active_events: {} });
+            statusText.textContent = 'Estado: Desconectado';
+            statusIndicator.className = 'stopped';
+        }
+    }
+
+    async function loadConfigs() {
+        try {
+            const response = await fetch('/api/mqtt_configs');
+            if (!response.ok) throw new Error('No se pudo obtener la lista de configuraciones.');
+            
+            const configs = await response.json();
+            configSelector.innerHTML = ''; // Limpiar opciones existentes
+
+            if (configs.length === 0) {
+                configSelector.innerHTML = '<option disabled value="">No hay configuraciones guardadas</option>';
+                deleteConfigBtn.disabled = true;
+            } else {
+                configs.forEach(config => {
+                    const option = document.createElement('option');
+                    option.value = config.id;
+                    option.textContent = config.note;
+                    configSelector.appendChild(option);
+                });
+                deleteConfigBtn.disabled = false;
+            }
+        } catch (error) {
+            logMessage(error.message, 'error');
+        }
+    }
+
+    // --- Event Listeners ---
+
+    mqttForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const data = {
+            note: document.getElementById('note').value,
+            broker: document.getElementById('broker').value,
+            port: document.getElementById('port').value,
+            topic: document.getElementById('topic').value,
+            username: document.getElementById('username').value,
+        };
+
+        try {
+            const response = await fetch('/api/mqtt_configs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+
+            if (!response.ok) throw new Error(result.error || 'Error desconocido al guardar.');
+
+            logMessage(`Configuración '${data.note}' guardada con éxito.`);
+            mqttForm.reset();
+            document.querySelector('.add-config-details').open = false;
+            await loadConfigs();
+            configSelector.value = result.id;
+        } catch (error) {
+            logMessage(error.message, 'error');
+        }
+    });
+
+    deleteConfigBtn.addEventListener('click', async () => {
+        const selectedConfigId = configSelector.value;
+        if (!selectedConfigId) {
+            logMessage("No hay ninguna configuración seleccionada para eliminar.", "warn");
+            return;
+        }
+
+        const selectedConfigNote = configSelector.options[configSelector.selectedIndex].text;
+        if (confirm(`¿Estás seguro de que quieres eliminar la configuración "${selectedConfigNote}"?`)) {
+            try {
+                const response = await fetch(`/api/mqtt_configs/${selectedConfigId}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Error desconocido al eliminar.');
+                
+                logMessage(`Configuración "${selectedConfigNote}" eliminada con éxito.`);
+                loadConfigs();
+            } catch (error) {
+                logMessage(error.message, 'error');
+            }
+        }
+    });
+
+    startBtn.addEventListener('click', () => {
+        const selectedConfigId = configSelector.value;
+        if (!selectedConfigId) {
+            logMessage("Por favor, seleccione o guarde una configuración MQTT antes de iniciar.", "error");
+            return;
+        }
+        const interval = intervalInput.value;
+
+        fetch('/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ config_id: selectedConfigId, interval: interval })
+        })
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok) throw new Error(data.message);
+            logMessage(data.message);
+            fetchStatus(); // Actualizar estado inmediatamente
+        })
+        .catch(error => {
+            logMessage(error.message, 'error');
+            fetchStatus(); // Sincronizar en caso de error
+        });
+    });
+
+    stopBtn.addEventListener('click', () => {
+        fetch('/stop', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                logMessage(data.message);
+                fetchStatus(); // Actualizar estado inmediatamente
+            })
+            .catch(error => {
+                logMessage(error.message, 'error');
+                fetchStatus(); // Sincronizar en caso de error
+            });
+    });
+
+    triggerBtn.addEventListener('click', () => {
+        const event = eventSelector.value;
+        
+        fetch('/trigger_event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event: event })
+        })
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok) throw new Error(data.message);
+            logMessage(data.message);
+            fetchStatus(); // Actualizar estado inmediatamente
+        })
+        .catch(error => {
+            logMessage(error.message, 'error');
+        });
+    });
+
+    // --- Inicialización ---
+    logMessage("Simulador listo. Seleccione una configuración y presione 'Iniciar Simulación'.");
+    loadConfigs();
+    fetchStatus(); // Cargar estado inicial
+    setInterval(fetchStatus, 2000); // Iniciar sondeo de estado
+});
