@@ -132,6 +132,10 @@ def simulation_loop(simulation_running_flag, active_event_ref, mqtt_config, inte
         except Exception as e:
             print(f"Error en el bucle de simulación: {e}")
         
-        time.sleep(interval_seconds)
+        # Wait for the interval, but check for the stop signal every second
+        for _ in range(interval_seconds):
+            if not simulation_running_flag():
+                break
+            time.sleep(1)
 
     print("Bucle de simulación detenido.")
