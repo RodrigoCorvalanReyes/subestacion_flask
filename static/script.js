@@ -2,8 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Elementos del DOM ---
     const startBtn = document.getElementById('start-sim');
     const stopBtn = document.getElementById('stop-sim');
-    const triggerBtn = document.getElementById('trigger-event');
-    const eventSelector = document.getElementById('event-selector');
+    // Remove the old triggerBtn and eventSelector since we're using buttons now
+    // const triggerBtn = document.getElementById('trigger-event');
+    // const eventSelector = document.getElementById('event-selector');
     
     const statusIndicator = document.getElementById('sim-status-indicator');
     const statusText = document.getElementById('sim-status-text');
@@ -22,7 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
         'c2h2_spike': 'Pico de Acetileno (Arco)',
         'overload': 'Sobrecarga',
         'fault': 'Falla del Cargador',
-        'flood': 'Inundación Detectada'
+        'flood': 'Sensor de Inundación',
+        'oil_pressure_high': 'Presión de Aceite Alta',
+        'oil_pressure_low': 'Presión de Aceite Baja',
+        'h2_high': 'Alta Concentración de H2',
+        'temp_high': 'Temperatura Alta',
+        'temp_low': 'Temperatura Baja',
+        'frequency_high': 'Frecuencia de Red Alta',
+        'frequency_low': 'Frecuencia de Red Baja',
+        'pressure_high': 'Presión de Agua Alta',
+        'pressure_low': 'Presión de Agua Baja',
+        'flow_high': 'Flujo de Agua Alto',
+        'flow_low': 'Flujo de Agua Bajo'
     };
 
     // --- Lógica de la Interfaz ---
@@ -69,17 +81,51 @@ document.addEventListener('DOMContentLoaded', () => {
         // Actualizar lista de eventos activos
         activeEventsList.innerHTML = '';
         if (totalActiveEvents === 0) {
-            activeEventsList.innerHTML = '<li>Ninguno</li>';
+            // Add system status when no events are active
+            const statusText = simulation_running ? 'Conectado' : 'Desconectado';
+            activeEventsList.innerHTML = `<li>${statusText} - Sin eventos activos</li>`;
         } else {
             for (const [target, events] of Object.entries(active_events)) {
                 for (const event_type of Object.keys(events)) {
                     const friendlyName = eventFriendlyNames[event_type] || event_type;
+                    // Map target codes to friendly names
+                    const targetNames = {
+                        'T3': 'T3',
+                        'T4': 'T4', 
+                        'BATTERY': 'Batería',
+                        'SUBSTATION': 'Subestación',
+                        'WATERLINE': 'Línea de Agua'
+                    };
+                    const targetDisplayName = targetNames[target] || target;
                     const li = document.createElement('li');
-                    li.textContent = `${target}: ${friendlyName}`;
+                    li.textContent = `${targetDisplayName}: ${friendlyName}`;
                     activeEventsList.appendChild(li);
                 }
             }
+            // Add system connection status when events are active
+            const statusText = simulation_running ? 'Conectado' : 'Desconectado';
+            const statusLi = document.createElement('li');
+            statusLi.textContent = `Sistema: ${statusText}`;
+            statusLi.style.fontStyle = 'italic';
+            statusLi.style.opacity = '0.7';
+            activeEventsList.appendChild(statusLi);
         }
+        
+        // Update button states based on active events
+        document.querySelectorAll('.event-btn').forEach(button => {
+            const event = button.getAttribute('data-event');
+            
+            // Reconstruct the target and event_type properly
+            const parts = event.split('_');
+            const target_part = parts[0];
+            const event_type_part = parts.slice(1).join('_');
+            
+            if (active_events[target_part] && active_events[target_part][event_type_part]) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
     }
 
     async function fetchStatus() {
@@ -216,13 +262,38 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 
-    triggerBtn.addEventListener('click', () => {
-        const event = eventSelector.value;
-        
+    // Event handling for new toggle buttons
+    const eventButtons = document.querySelectorAll('.event-btn');
+    const clearAllBtn = document.getElementById('clear-all-events');
+    
+    // Add click event listeners to each event button
+    eventButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const event = button.getAttribute('data-event');
+            
+            fetch('/trigger_event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ event: event })
+            })
+            .then(response => response.json().then(data => ({ ok: response.ok, data })))
+            .then(({ ok, data }) => {
+                if (!ok) throw new Error(data.message);
+                logMessage(data.message);
+                fetchStatus(); // Actualizar estado inmediatamente
+            })
+            .catch(error => {
+                logMessage(error.message, 'error');
+            });
+        });
+    });
+    
+    // Add click event listener to clear all events button
+    clearAllBtn.addEventListener('click', () => {
         fetch('/trigger_event', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ event: event })
+            body: JSON.stringify({ event: "none" })
         })
         .then(response => response.json().then(data => ({ ok: response.ok, data })))
         .then(({ ok, data }) => {

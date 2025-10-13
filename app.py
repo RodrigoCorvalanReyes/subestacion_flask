@@ -16,7 +16,8 @@ active_event = {
     "T3": {},
     "T4": {},
     "BATTERY": {},
-    "SUBSTATION": {}
+    "SUBSTATION": {},
+    "WATERLINE": {}
 }
 
 # --- Rutas de la Interfaz ---
@@ -106,7 +107,8 @@ def trigger_event():
             "T3": {},
             "T4": {},
             "BATTERY": {},
-            "SUBSTATION": {}
+            "SUBSTATION": {},
+            "WATERLINE": {}
         })
         msg = "Operación normal - todos los eventos desactivados."
         print(msg)
@@ -146,4 +148,4 @@ def get_status():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5001, debug=True, use_reloader=False)

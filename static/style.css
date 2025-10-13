@@ -34,6 +34,42 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     padding: 2rem;
     border: 1px solid var(--secondary-surface-color);
+    position: relative;
+}
+
+.main-layout {
+    display: flex;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.left-column {
+    flex: 0 0 300px; /* Fixed width for the left column */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: sticky;
+    top: 2rem; /* Account for header height */
+    height: calc(100vh - 4rem); /* Full viewport height minus top and bottom margins */
+    align-self: flex-start;
+    min-height: 600px; /* Minimum height to ensure it's visible */
+}
+
+.left-column > * {
+    flex: 0 0 auto; /* Prevent items from growing */
+}
+
+.right-column {
+    flex: 1;
+    min-width: 0; /* Allows flex item to shrink below content size */
+}
+
+/* Adjust existing styles to work with new layout */
+.status, #active-events-container {
+    background-color: var(--secondary-surface-color);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 h1 {
@@ -51,6 +87,16 @@ h1 {
     padding: 1.5rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
+}
+
+/* Add margin to left column elements */
+.left-column .status {
+    margin-bottom: 0;
+}
+
+/* Add top margin to controls to account for the sticky active events container */
+.controls {
+    margin-top: 1rem;
 }
 
 h2 {
@@ -150,6 +196,141 @@ select {
     border-radius: 8px;
     margin-bottom: 1.5rem;
     font-size: 1.2rem;
+}
+
+/* Styles for active events container */
+#active-events-container {
+    background-color: var(--secondary-surface-color);
+    border-radius: 8px;
+    padding: 1rem;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 149, 213, 0.3); /* subtle accent border */
+    flex: 1; /* Take remaining space in left column */
+    display: flex;
+    flex-direction: column;
+}
+
+#active-events-container h4 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: var(--primary-accent-color);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+#active-events-container h4::before {
+    content: "🔴";
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+#active-events-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    flex: 1; /* Take all available space */
+    overflow-y: auto; /* Add scrolling if needed */
+    min-height: 100px; /* Ensure there's minimum space for events */
+}
+
+#active-events-list li {
+    background-color: #3c3f47;
+    border-left: 3px solid var(--warning-color);
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+}
+
+#active-events-list li::before {
+    content: "⚠️ ";
+    margin-right: 0.5rem;
+}
+
+#active-events-list li:last-child {
+    margin-bottom: 0;
+}
+
+#active-events-list li:empty {
+    display: none;
+}
+
+#active-events-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-accent-color), transparent);
+}
+
+/* Adjust spacing between status and events in left column */
+.left-column .status {
+    margin-bottom: 0;
+}
+
+#active-events-container h4 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: var(--primary-accent-color);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+#active-events-container h4::before {
+    content: "🔴";
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+#active-events-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#active-events-list li {
+    background-color: #3c3f47;
+    border-left: 3px solid var(--warning-color);
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+}
+
+#active-events-list li::before {
+    content: "⚠️ ";
+    margin-right: 0.5rem;
+}
+
+#active-events-list li:last-child {
+    margin-bottom: 0;
+}
+
+#active-events-list li:empty {
+    display: none;
+}
+
+#active-events-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-accent-color), transparent);
 }
 
 #sim-status-indicator {
@@ -386,4 +567,63 @@ select {
     padding: 3px 6px;
     border-radius: 4px;
     font-family: 'Courier New', Courier, monospace;
+}
+
+/* Event button styles */
+.event-buttons h3 {
+    margin: 1.5rem 0 0.5rem 0;
+    color: var(--primary-accent-color);
+    font-size: 1rem;
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.event-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.75rem;
+    border: 1px solid #555;
+    background-color: #4a4d55;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.event-btn:hover {
+    border-color: var(--primary-accent-color);
+    background-color: #555860;
+}
+
+.event-btn.active {
+    background-color: var(--warning-color) !important;
+    border-color: var(--warning-color) !important;
+    color: #000;
+    font-weight: bold;
+}
+
+.event-btn.active:hover {
+    background-color: #e0a800 !important;
+    border-color: #e0a800 !important;
+}
+
+.clear-btn {
+    background-color: var(--error-color) !important;
+    border-color: var(--error-color) !important;
+    color: white !important;
+    padding: 0.75rem 1rem;
+    min-width: auto;
+    flex: none;
+}
+
+.clear-btn:hover {
+    background-color: #c82333 !important;
+    border-color: #c82333 !important;
 }
