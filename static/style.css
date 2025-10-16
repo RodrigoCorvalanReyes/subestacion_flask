@@ -19,7 +19,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     margin: 0;
-    padding: 2rem;
+    padding: 1rem;  /* Reduced from 2rem to 1rem */
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -28,7 +28,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;  /* Increased width */
     background-color: var(--primary-surface-color);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -626,4 +626,9 @@ select {
 .clear-btn:hover {
     background-color: #c82333 !important;
     border-color: #c82333 !important;
+}
+
+.clear-all-container {
+    text-align: center;
+    margin-top: 20px;
 }

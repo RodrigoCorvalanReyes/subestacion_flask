@@ -63,44 +63,64 @@ La interfaz web proporciona un control total sobre la simulación, incluyendo la
 └── README.md              # Este archivo
 ```
 
-## Variables de Simulación
+## Descripción de Variables de Simulación
 
-A continuación se detallan las variables generadas por el simulador, con sus rangos de valores exactos extraídos del código fuente.
+Esta sección detalla cada una de las variables generadas por el simulador.
+
+---
 
 ### Transformadores (T3 y T4)
 
-| Variable | Unidad | Rango Nominal | Rango en Falla | Falla Asociada |
-| :--- | :---: | :--- | :--- | :--- |
-| `*_transformer_load_pct` | % | `70.2 - 85.8` | `104.5 - 115.5` | Sobrecarga |
-| `*_cooling_flow_lps` | L/s | `38.8 - 41.2` | `4.8 - 11.2` | Falla de Refrigeración |
-| `*_C2H2_ppm` | ppm | `0.42 - 0.58` | `11.25 - 18.75` | Pico de Acetileno (Arco) |
-| `*_top_oil_temp` | °C | `71.08 - 80.25` | `78.72 - 85.28` | Sobrecarga / Falla Refrigeración |
-| `*_winding_temp` | °C | `84.02 - 93.8` | `92.16 - 99.84` | Sobrecarga / Falla Refrigeración |
-| `*_hot_spot_temp` | °C | `94.02 - 103.8` | `102.16 - 109.84`| Sobrecarga / Falla Refrigeración |
-| `*_ambient_temp` | °C | `22.5 - 27.5` | - | - |
-| `*_ambient_humidity` | % | `42.5 - 57.5` | - | - |
-| `*_oil_pressure` | bar | `1.42 - 1.58` | - | - |
-| `*_H2_ppm` | ppm | `10.8 - 13.2` | - | - |
-| `*_fan_status` | - | `ON` si temp > 75°C | `ON` | - |
-| `*_pump_status` | - | `ON` si flujo > 10 L/s | `OFF` | Falla de Refrigeración |
-| `*_tap_changer_position`| - | `1 - 9` (aleatorio) | - | - |
+*El prefijo `*` en los nombres de las variables debe reemplazarse por `T3` o `T4`.*
 
-*El prefijo `*` corresponde a `T3` o `T4`.*
+-   `*_cooling_flow_lps` (Litros por segundo): Caudal del sistema de refrigeración por líquido del transformador. Un valor bajo indica una falla.
+-   `*_top_oil_temp` (°C): Temperatura del aceite en la parte superior del transformador. Aumenta con la carga y en fallas de refrigeración.
+-   `*_winding_temp` (°C): Temperatura de los devanados (bobinas) del transformador. Es uno de los indicadores de temperatura más críticos.
+-   `*_transformer_temp` (°C): Temperatura general del cuerpo del transformador.
+-   `*_hot_spot_temp` (°C): Temperatura estimada del punto más caliente dentro de los devanados. Se calcula a partir de la temperatura de los devanados.
+-   `*_ambient_temp` (°C): Temperatura ambiente alrededor del transformador.
+-   `*_ambient_humidity` (%): Humedad relativa del ambiente alrededor del transformador.
+-   `*_oil_pressure` (bar): Presión del aceite dieléctrico dentro del transformador.
+-   `*_fan_status` (ON/OFF): Estado de los ventiladores de refrigeración. Se activan por alta temperatura.
+-   `*_pump_status` (ON/OFF): Estado de la bomba de circulación de aceite. Se activa por un flujo suficiente.
+-   `*_tap_changer_position` (Entero): Posición del cambiador de tomas, un dispositivo que ajusta la relación de vueltas del transformador.
+-   `*_transformer_load_pct` (%): Porcentaje de la carga actual del transformador respecto a su capacidad nominal.
+
+---
 
 ### Cargador de Baterías
 
-| Variable | Unidad | Rango Nominal | Rango en Falla | Falla Asociada |
-| :--- | :---: | :--- | :--- | :--- |
-| `charger_status` | - | `FLOAT` | `FAULT` | Falla del Cargador |
-| `battery_voltage_V` | V | `122.5 - 127.5` | `104.5 - 115.5` | Falla del Cargador |
-| `battery_current_A` | A | `4.5 - 5.5` | `-18 - -12` | Falla del Cargador |
-| `battery_state_of_charge_pct`| % | `96.04 - 99.96` | - | - |
-| `battery_temp_C` | °C | `28.5 - 31.5` | - | - |
+-   `battery_voltage_V` (Voltios): Voltaje de salida del banco de baterías. Un voltaje bajo puede indicar una falla.
+-   `battery_current_A` (Amperios): Corriente que fluye hacia o desde las baterías. Un valor negativo indica que las baterías se están descargando.
+-   `battery_input_voltage_V` (Voltios): Voltaje de entrada de corriente alterna que alimenta al cargador.
+-   `battery_output_voltage_V` (Voltios): Voltaje de salida de corriente continua del cargador.
+-   `battery_state_of_charge_pct` (%): Porcentaje del estado de carga de las baterías.
+-   `battery_temp_C` (°C): Temperatura del banco de baterías.
+-   `charger_status` (FLOAT/FAULT): Estado del cargador. `FLOAT` es normal (carga de mantenimiento), `FAULT` indica una falla.
+
+---
 
 ### Sensores Generales de la Subestación
 
-| Variable | Unidad | Rango Nominal | Rango en Falla | Falla Asociada |
-| :--- | :---: | :--- | :--- | :--- |
-| `flood_sensor_status` | - | `0` (Seco) | `1` (Inundado) | Inundación |
-| `room_temp_control` | °C | `21.34 - 22.66` | - | - |
-| `grid_frequency_Hz` | Hz | `49.95 - 50.05` | - | - |
+-   `room_temp_control` (°C): Temperatura de la sala de control o de equipos.
+-   `grid_frequency_Hz` (Hertz): Frecuencia de la red eléctrica. Debe ser muy estable (cercana a 50Hz).
+-   `flood_sensor_status` (0/1): Estado del sensor de inundación. `0` es seco, `1` es inundado.
+-   `room_humidity` (%): Humedad relativa en la sala de control.
+
+---
+
+### Línea de Agua
+
+-   `water_pressure_psi` (PSI): Presión en la línea de agua del sistema contra incendios o de refrigeración.
+-   `flowmeter_lps` (Litros por segundo): Caudal medido en la línea de agua.
+
+---
+
+### Sonda Hydran (Análisis de Gases Disueltos)
+
+Estas variables representan la concentración de diferentes gases disueltos en el aceite del transformador, medidos en porcentaje. Son indicadores clave para el diagnóstico de fallas internas.
+
+-   `h2_concentration_pct` (%): Concentración de Hidrógeno (H2). Un aumento súbito es un fuerte indicador de descargas parciales (corona).
+-   `ch4_concentration_pct` (%): Concentración de Metano (CH4). Se asocia con sobrecalentamiento de baja temperatura.
+-   `c2h6_concentration_pct` (%): Concentración de Etano (C2H6). También se asocia con sobrecalentamiento.
+-   `c2h2_concentration_pct` (%): Concentración de Acetileno (C2H2). Es un gas crítico que casi exclusivamente indica la presencia de arcos eléctricos de alta energía, una falla muy severa.

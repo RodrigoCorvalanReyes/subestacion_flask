@@ -20,13 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Mapa de Nombres de Eventos ---
     const eventFriendlyNames = {
         'cooling_fault': 'Falla de Refrigeración',
-        'c2h2_spike': 'Pico de Acetileno (Arco)',
         'overload': 'Sobrecarga',
         'fault': 'Falla del Cargador',
         'flood': 'Sensor de Inundación',
         'oil_pressure_high': 'Presión de Aceite Alta',
         'oil_pressure_low': 'Presión de Aceite Baja',
-        'h2_high': 'Alta Concentración de H2',
+        'transformer_temp_high': 'Temperatura de Transformador Alta',
         'temp_high': 'Temperatura Alta',
         'temp_low': 'Temperatura Baja',
         'frequency_high': 'Frecuencia de Red Alta',
@@ -34,7 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
         'pressure_high': 'Presión de Agua Alta',
         'pressure_low': 'Presión de Agua Baja',
         'flow_high': 'Flujo de Agua Alto',
-        'flow_low': 'Flujo de Agua Bajo'
+        'flow_low': 'Flujo de Agua Bajo',
+        'h2_high': 'Falla H2',
+        'ch4_high': 'Falla CH4',
+        'c2h6_high': 'Falla C2H6',
+        'c2h2_high': 'Falla C2H2'
     };
 
     // --- Lógica de la Interfaz ---

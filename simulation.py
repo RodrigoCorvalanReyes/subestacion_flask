@@ -20,17 +20,20 @@ class Transformer:
         self.name = name
 
     def update_data(self, active_events):
-        # Fallas existentes
+        # --- Fallas Físicas y Eléctricas ---
         is_overload = check_event_active(active_events, self.name, "overload")
         is_cooling_fault = check_event_active(active_events, self.name, "cooling_fault")
-        is_c2h2_spike = check_event_active(active_events, self.name, "c2h2_spike")
-        
-        # Nuevas fallas del resumen
         is_oil_pressure_high = check_event_active(active_events, self.name, "oil_pressure_high")
         is_oil_pressure_low = check_event_active(active_events, self.name, "oil_pressure_low")
-        is_h2_high = check_event_active(active_events, self.name, "h2_high")
+        is_transformer_temp_high = check_event_active(active_events, self.name, "transformer_temp_high")
 
-        # Simulación de variables
+        # --- Fallas de Gases Disueltos (DGA) ---
+        is_h2_high = check_event_active(active_events, self.name, "h2_high")
+        is_ch4_high = check_event_active(active_events, self.name, "ch4_high")
+        is_c2h6_high = check_event_active(active_events, self.name, "c2h6_high")
+        is_c2h2_high = check_event_active(active_events, self.name, "c2h2_high")
+
+        # --- Simulación de Variables Físicas ---
         load_pct = generate_noise(78, 10)
         if is_overload:
             load_pct = generate_noise(110, 5)
@@ -39,38 +42,61 @@ class Transformer:
         if is_cooling_fault:
             cooling_flow = generate_noise(8, 40)
 
-        c2h2_ppm = generate_noise(0.5, 15)
-        if is_c2h2_spike:
-            c2h2_ppm = generate_noise(15, 25)
-        
         oil_pressure = generate_noise(1.5, 5)
         if is_oil_pressure_high:
             oil_pressure = random.uniform(2.37, 2.62)
         elif is_oil_pressure_low:
             oil_pressure = random.uniform(0.47, 0.52)
 
-        h2_ppm = generate_noise(12, 10)
-        if is_h2_high:
-            h2_ppm = random.uniform(18, 22)
-
         top_oil_temp = generate_noise(60 + (load_pct / 100) * 20, 4)
         winding_temp = generate_noise(70 + (load_pct / 100) * 25, 4)
+        
+        if is_cooling_fault:
+            top_oil_temp = generate_noise(top_oil_temp + 15, 3)
+            winding_temp = generate_noise(winding_temp + 20, 3)
 
-        return {
+        transformer_temp = generate_noise(65 + (load_pct / 100) * 22, 4)
+        
+        if is_transformer_temp_high:
+            transformer_temp = generate_noise(85 + (load_pct / 100) * 22, 3)
+
+        # --- Simulación de Variables de Gases (DGA) ---
+        h2_concentration = generate_noise(0.05, 20, 3)
+        ch4_concentration = generate_noise(0.02, 15, 3)
+        c2h6_concentration = generate_noise(0.01, 25, 3)
+        c2h2_concentration = generate_noise(0.005, 30, 3)
+
+        if is_h2_high:
+            h2_concentration = generate_noise(0.15, 10, 3)
+        if is_ch4_high:
+            ch4_concentration = generate_noise(0.08, 10, 3)
+        if is_c2h6_high:
+            c2h6_concentration = generate_noise(0.05, 10, 3)
+        if is_c2h2_high:
+            c2h2_concentration = generate_noise(0.05, 15, 3)
+
+        # --- Consolidación de Datos ---
+        payload = {
+            # Físicas
             f"{self.name}_cooling_flow_lps": cooling_flow,
-            f"{self.name}_top_oil_temp": top_oil_temp,
-            f"{self.name}_winding_temp": winding_temp,
-            f"{self.name}_hot_spot_temp": winding_temp + 10,
+            f"{self.name}_top_oil_temp": round(top_oil_temp, 2),
+            f"{self.name}_winding_temp": round(winding_temp, 2),
+            f"{self.name}_transformer_temp": transformer_temp,
+            f"{self.name}_hot_spot_temp": round(winding_temp + 10, 2),
             f"{self.name}_ambient_temp": generate_noise(25, 10),
             f"{self.name}_ambient_humidity": generate_noise(50, 15),
             f"{self.name}_oil_pressure": round(oil_pressure, 2),
-            f"{self.name}_H2_ppm": round(h2_ppm, 2),
-            f"{self.name}_C2H2_ppm": c2h2_ppm,
             f"{self.name}_fan_status": "ON" if top_oil_temp > 75 else "OFF",
             f"{self.name}_pump_status": "ON" if cooling_flow > 10 else "OFF",
             f"{self.name}_tap_changer_position": random.randint(1, 9),
             f"{self.name}_transformer_load_pct": load_pct,
+            # DGA
+            f"{self.name}_h2_concentration_pct": round(h2_concentration, 3),
+            f"{self.name}_ch4_concentration_pct": round(ch4_concentration, 3),
+            f"{self.name}_c2h6_concentration_pct": round(c2h6_concentration, 3),
+            f"{self.name}_c2h2_concentration_pct": round(c2h2_concentration, 3),
         }
+        return payload
 
 class BatteryCharger:
     def __init__(self):
@@ -84,11 +110,15 @@ class BatteryCharger:
         battery_voltage = generate_noise(125, 2)
         battery_current = generate_noise(5, 10)
         battery_temp = generate_noise(30, 5)
+        battery_input_voltage = generate_noise(220, 3)  # New variable for battery input voltage
+        battery_output_voltage = generate_noise(125, 2)  # New variable for battery output voltage
 
         if is_fault:
             charger_status = "FAULT"
             battery_voltage = generate_noise(110, 5)
             battery_current = generate_noise(-15, 20)
+            battery_input_voltage = generate_noise(190, 5)  # Lower input voltage in fault
+            battery_output_voltage = generate_noise(110, 5)  # Lower output voltage in fault
         
         if is_temp_high:
             battery_temp = random.uniform(38, 42)
@@ -96,6 +126,8 @@ class BatteryCharger:
         return {
             "battery_voltage_V": battery_voltage,
             "battery_current_A": battery_current,
+            "battery_input_voltage_V": battery_input_voltage,  # New battery input voltage
+            "battery_output_voltage_V": battery_output_voltage,  # New battery output voltage
             "battery_state_of_charge_pct": generate_noise(98, 2),
             "battery_temp_C": round(battery_temp, 2),
             "charger_status": charger_status,
@@ -104,7 +136,7 @@ class BatteryCharger:
 class Substation:
     def update_data(self, active_events):
         # Fallas existentes
-        is_flood = check_event_active(active_events, "SUBSTATION", "flood")
+        is_flood = check_event_active(active_events, "WATERLINE", "flood")
         
         # Nuevas fallas del resumen
         is_temp_high = check_event_active(active_events, "SUBSTATION", "temp_high")
@@ -161,7 +193,7 @@ class WaterLine:
         }
 
 # --- Bucle Principal de Simulación ---
-def simulation_loop(simulation_running_flag, active_event_ref, mqtt_config, interval_seconds):
+def simulation_loop(stop_event, active_event_ref, mqtt_config, interval_seconds):
     print(f"Bucle de simulación iniciado con la configuración: {mqtt_config['note']}")
 
     t3 = Transformer("T3")
@@ -170,7 +202,7 @@ def simulation_loop(simulation_running_flag, active_event_ref, mqtt_config, inte
     station = Substation()
     water_line = WaterLine()
 
-    while simulation_running_flag():
+    while not stop_event.is_set():
         try:
             full_payload = {
                 "ts": int(time.time() * 1000),
@@ -196,6 +228,7 @@ def simulation_loop(simulation_running_flag, active_event_ref, mqtt_config, inte
         except Exception as e:
             print(f"Error en el bucle de simulación: {e}")
         
-        time.sleep(interval_seconds)
+        # Esperar el intervalo de forma interrumpible
+        stop_event.wait(interval_seconds)
 
     print("Bucle de simulación detenido.")

@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # --- Estado de la Simulación ---
 simulation_thread = None
-simulation_running = False
+simulation_stop_event = threading.Event() # Usar un Event para un control más robusto
 # Dictionary to track multiple simultaneous active events
 active_event = {
     "T3": {},
@@ -60,7 +60,7 @@ def delete_config_route(config_id):
 
 @app.route('/start', methods=['POST'])
 def start_simulation():
-    global simulation_thread, simulation_running
+    global simulation_thread, simulation_stop_event
     
     data = request.get_json()
     config_id = data.get('config_id')
@@ -74,10 +74,10 @@ def start_simulation():
         return jsonify({"status": "Error", "message": f"No se encontró una configuración con ID {config_id}."}), 404
 
     if simulation_thread is None or not simulation_thread.is_alive():
-        simulation_running = True
+        simulation_stop_event.clear() # Limpiar el evento de detención para la nueva ejecución
         simulation_thread = threading.Thread(
             target=simulation_loop, 
-            args=(lambda: simulation_running, active_event, mqtt_config, interval)
+            args=(simulation_stop_event, active_event, mqtt_config, interval)
         )
         simulation_thread.daemon = True
         simulation_thread.start()
@@ -87,10 +87,10 @@ def start_simulation():
 
 @app.route('/stop', methods=['POST'])
 def stop_simulation():
-    global simulation_thread, simulation_running
+    global simulation_thread, simulation_stop_event
     if simulation_thread and simulation_thread.is_alive():
-        simulation_running = False
-        simulation_thread.join()
+        simulation_stop_event.set() # Enviar señal para detener el bucle
+        simulation_thread.join()    # Esperar a que el hilo termine (será rápido)
         simulation_thread = None
         return jsonify({"status": "Stopped", "message": "Simulación detenida correctamente."})
     return jsonify({"status": "Stopped", "message": "La simulación no estaba en ejecución."})
@@ -130,17 +130,17 @@ def trigger_event():
         
         print(msg)
         return jsonify({"status": "Running", "message": msg})
-    except ValueError:
-        msg = f"Formato de evento inválido: {event_name}"
-        print(msg)
+    except (ValueError, KeyError) as e:
+        msg = f"Formato de evento inválido o clave no encontrada: {event_name}"
+        print(f"{msg} - Error: {e}")
         return jsonify({"status": "Error", "message": msg}), 400
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
-    global simulation_running, active_event, simulation_thread
-    # Asegurarse de que el estado es consistente
-    if simulation_thread is None or not simulation_thread.is_alive():
-        simulation_running = False
+    global simulation_thread, active_event
+    
+    # El estado de la simulación se deriva directamente del estado del hilo
+    simulation_running = simulation_thread is not None and simulation_thread.is_alive()
         
     return jsonify({
         "simulation_running": simulation_running,

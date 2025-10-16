@@ -72,26 +72,36 @@
                     <div class="event-buttons">
                         <h3>Transformador T3</h3>
                         <div class="button-row">
-                            <button class="event-btn" data-event="T3_cooling_fault">Falla de Refrigeración</button>
-                            <button class="event-btn" data-event="T3_c2h2_spike">Pico de Acetileno (Arco)</button>
                             <button class="event-btn" data-event="T3_overload">Sobrecarga</button>
+                            <button class="event-btn" data-event="T3_cooling_fault">Falla de Refrigeración</button>
+                            <button class="event-btn" data-event="T3_transformer_temp_high">Temperatura Alta</button>
                         </div>
                         <div class="button-row">
                             <button class="event-btn" data-event="T3_oil_pressure_high">Presión de Aceite Alta</button>
                             <button class="event-btn" data-event="T3_oil_pressure_low">Presión de Aceite Baja</button>
-                            <button class="event-btn" data-event="T3_h2_high">Alta Concentración de H2</button>
+                        </div>
+                        <div class="button-row">
+                            <button class="event-btn" data-event="T3_h2_high">Falla H2</button>
+                            <button class="event-btn" data-event="T3_ch4_high">Falla CH4</button>
+                            <button class="event-btn" data-event="T3_c2h6_high">Falla C2H6</button>
+                            <button class="event-btn" data-event="T3_c2h2_high">Falla C2H2</button>
                         </div>
                         
                         <h3>Transformador T4</h3>
                         <div class="button-row">
-                            <button class="event-btn" data-event="T4_cooling_fault">Falla de Refrigeración</button>
-                            <button class="event-btn" data-event="T4_c2h2_spike">Pico de Acetileno (Arco)</button>
                             <button class="event-btn" data-event="T4_overload">Sobrecarga</button>
+                            <button class="event-btn" data-event="T4_cooling_fault">Falla de Refrigeración</button>
+                            <button class="event-btn" data-event="T4_transformer_temp_high">Temperatura Alta</button>
                         </div>
                         <div class="button-row">
                             <button class="event-btn" data-event="T4_oil_pressure_high">Presión de Aceite Alta</button>
                             <button class="event-btn" data-event="T4_oil_pressure_low">Presión de Aceite Baja</button>
-                            <button class="event-btn" data-event="T4_h2_high">Alta Concentración de H2</button>
+                        </div>
+                        <div class="button-row">
+                            <button class="event-btn" data-event="T4_h2_high">Falla H2</button>
+                            <button class="event-btn" data-event="T4_ch4_high">Falla CH4</button>
+                            <button class="event-btn" data-event="T4_c2h6_high">Falla C2H6</button>
+                            <button class="event-btn" data-event="T4_c2h2_high">Falla C2H2</button>
                         </div>
                         
                         <h3>Baterías</h3>
@@ -108,7 +118,7 @@
                         </div>
                         <div class="button-row">
                             <button class="event-btn" data-event="WATERLINE_flow_low">Flujo de Agua Bajo</button>
-                            <button class="event-btn" data-event="WATERLINE_flood">Inundación (Línea de Agua)</button>
+                            <button class="event-btn" data-event="WATERLINE_flood">Inundación</button>
                         </div>
                         
                         <h3>Subestación</h3>
@@ -119,9 +129,9 @@
                             <button class="event-btn" data-event="SUBSTATION_frequency_low">Frecuencia de Red Baja</button>
                         </div>
                         
-                        <div class="button-row">
-                            <button id="clear-all-events" class="clear-btn">Limpiar Todas las Fallas</button>
-                        </div>
+                    </div>
+                    <div class="clear-all-container">
+                        <button id="clear-all-events" class="clear-btn">Limpiar Todas las Fallas</button>
                     </div>
                 </div>
 
@@ -135,103 +145,25 @@
                                 <tr>
                                     <th>Variable</th>
                                     <th>Unidad</th>
-                                    <th>Rango Nominal</th>
-                                    <th>Rango en Falla</th>
-                                    <th>Falla Asociada</th>
+                                    <th>Descripción</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><code>*_transformer_load_pct</code></td>
-                                    <td>%</td>
-                                    <td><code>70.2 - 85.8</code></td>
-                                    <td><code>104.5 - 115.5</code></td>
-                                    <td>Sobrecarga</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_cooling_flow_lps</code></td>
-                                    <td>L/s</td>
-                                    <td><code>38.8 - 41.2</code></td>
-                                    <td><code>4.8 - 11.2</code></td>
-                                    <td>Falla de Refrigeración</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_C2H2_ppm</code></td>
-                                    <td>ppm</td>
-                                    <td><code>0.42 - 0.58</code></td>
-                                    <td><code>11.25 - 18.75</code></td>
-                                    <td>Pico de Acetileno (Arco)</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_top_oil_temp</code></td>
-                                    <td>°C</td>
-                                    <td><code>71.08 - 80.25</code></td>
-                                    <td><code>78.72 - 85.28</code></td>
-                                    <td>Sobrecarga / Falla Refrigeración</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_winding_temp</code></td>
-                                    <td>°C</td>
-                                    <td><code>84.02 - 93.8</code></td>
-                                    <td><code>92.16 - 99.84</code></td>
-                                    <td>Sobrecarga / Falla Refrigeración</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_hot_spot_temp</code></td>
-                                    <td>°C</td>
-                                    <td><code>94.02 - 103.8</code></td>
-                                    <td><code>102.16 - 109.84</code></td>
-                                    <td>Sobrecarga / Falla Refrigeración</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_ambient_temp</code></td>
-                                    <td>°C</td>
-                                    <td><code>22.5 - 27.5</code></td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_ambient_humidity</code></td>
-                                    <td>%</td>
-                                    <td><code>42.5 - 57.5</code></td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_oil_pressure</code></td>
-                                    <td>bar</td>
-                                    <td><code>1.42 - 1.58</code></td>
-                                    <td><code>0.47 - 0.52</code> (baja) / <code>2.37 - 2.62</code> (alta)</td>
-                                    <td>Presión de Aceite Baja / Alta</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_H2_ppm</code></td>
-                                    <td>ppm</td>
-                                    <td><code>10.8 - 13.2</code></td>
-                                    <td><code>18 - 22</code></td>
-                                    <td>Alta Concentración de H2</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_fan_status</code></td>
-                                    <td>-</td>
-                                    <td><code>ON</code> si temp > 75°C</td>
-                                    <td><code>ON</code></td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_pump_status</code></td>
-                                    <td>-</td>
-                                    <td><code>ON</code> si flujo > 10 L/s</td>
-                                    <td><code>OFF</code></td>
-                                    <td>Falla de Refrigeración</td>
-                                </tr>
-                                <tr>
-                                    <td><code>*_tap_changer_position</code></td>
-                                    <td>-</td>
-                                    <td><code>1 - 9</code> (aleatorio)</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
+                                <tr><td><code>*_transformer_load_pct</code></td><td>%</td><td>Porcentaje de carga del transformador.</td></tr>
+                                <tr><td><code>*_cooling_flow_lps</code></td><td>L/s</td><td>Caudal del sistema de refrigeración.</td></tr>
+                                <tr><td><code>*_top_oil_temp</code></td><td>°C</td><td>Temperatura del aceite superior.</td></tr>
+                                <tr><td><code>*_winding_temp</code></td><td>°C</td><td>Temperatura de los devanados.</td></tr>
+                                <tr><td><code>*_hot_spot_temp</code></td><td>°C</td><td>Temperatura del punto más caliente.</td></tr>
+                                <tr><td><code>*_oil_pressure</code></td><td>bar</td><td>Presión del aceite dieléctrico.</td></tr>
+                                <tr><td><code>*_ambient_temp</code></td><td>°C</td><td>Temperatura ambiente.</td></tr>
+                                <tr><td><code>*_ambient_humidity</code></td><td>%</td><td>Humedad ambiente.</td></tr>
+                                <tr><td><code>*_fan_status</code></td><td>ON/OFF</td><td>Estado de los ventiladores.</td></tr>
+                                <tr><td><code>*_pump_status</code></td><td>ON/OFF</td><td>Estado de la bomba de aceite.</td></tr>
+                                <tr><td><code>*_tap_changer_position</code></td><td>-</td><td>Posición del cambiador de tomas.</td></tr>
+                                <tr><td><code>*_h2_concentration_pct</code></td><td>%</td><td>Concentración de Hidrógeno (H2).</td></tr>
+                                <tr><td><code>*_ch4_concentration_pct</code></td><td>%</td><td>Concentración de Metano (CH4).</td></tr>
+                                <tr><td><code>*_c2h6_concentration_pct</code></td><td>%</td><td>Concentración de Etano (C2H6).</td></tr>
+                                <tr><td><code>*_c2h2_concentration_pct</code></td><td>%</td><td>Concentración de Acetileno (C2H2).</td></tr>
                             </tbody>
                         </table>
                         <p><em>El prefijo <code>*</code> corresponde a <code>T3</code> o <code>T4</code>.</em></p>
@@ -243,47 +175,17 @@
                                 <tr>
                                     <th>Variable</th>
                                     <th>Unidad</th>
-                                    <th>Rango Nominal</th>
-                                    <th>Rango en Falla</th>
-                                    <th>Falla Asociada</th>
+                                    <th>Descripción</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><code>charger_status</code></td>
-                                    <td>-</td>
-                                    <td><code>FLOAT</code></td>
-                                    <td><code>FAULT</code></td>
-                                    <td>Falla del Cargador</td>
-                                </tr>
-                                <tr>
-                                    <td><code>battery_voltage_V</code></td>
-                                    <td>V</td>
-                                    <td><code>122.5 - 127.5</code></td>
-                                    <td><code>104.5 - 115.5</code></td>
-                                    <td>Falla del Cargador</td>
-                                </tr>
-                                <tr>
-                                    <td><code>battery_current_A</code></td>
-                                    <td>A</td>
-                                    <td><code>4.5 - 5.5</code></td>
-                                    <td><code>-18 - -12</code></td>
-                                    <td>Falla del Cargador</td>
-                                </tr>
-                                <tr>
-                                    <td><code>battery_state_of_charge_pct</code></td>
-                                    <td>%</td>
-                                    <td><code>96.04 - 99.96</code></td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td><code>battery_temp_C</code></td>
-                                    <td>°C</td>
-                                    <td><code>28.5 - 31.5</code></td>
-                                    <td><code>38 - 42</code></td>
-                                    <td>Temperatura Alta</td>
-                                </tr>
+                                <tr><td><code>charger_status</code></td><td>-</td><td>Estado del cargador (FLOAT/FAULT).</td></tr>
+                                <tr><td><code>battery_voltage_V</code></td><td>V</td><td>Voltaje del banco de baterías.</td></tr>
+                                <tr><td><code>battery_current_A</code></td><td>A</td><td>Corriente de carga/descarga de baterías.</td></tr>
+                                <tr><td><code>battery_state_of_charge_pct</code></td><td>%</td><td>Porcentaje de carga de baterías.</td></tr>
+                                <tr><td><code>battery_temp_C</code></td><td>°C</td><td>Temperatura del banco de baterías.</td></tr>
+                                <tr><td><code>battery_input_voltage_V</code></td><td>V</td><td>Voltaje de entrada AC del cargador.</td></tr>
+                                <tr><td><code>battery_output_voltage_V</code></td><td>V</td><td>Voltaje de salida DC del cargador.</td></tr>
                             </tbody>
                         </table>
                     </details>
@@ -294,33 +196,13 @@
                                 <tr>
                                     <th>Variable</th>
                                     <th>Unidad</th>
-                                    <th>Rango Nominal</th>
-                                    <th>Rango en Falla</th>
-                                    <th>Falla Asociada</th>
+                                    <th>Descripción</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><code>water_pressure_psi</code></td>
-                                    <td>psi</td>
-                                    <td><code>47.5 - 52.5</code></td>
-                                    <td><code>28.5 - 31.5</code> (baja) / <code>66.5 - 73.5</code> (alta)</td>
-                                    <td>Presión de Agua Baja / Alta</td>
-                                </tr>
-                                <tr>
-                                    <td><code>flowmeter_lps</code></td>
-                                    <td>L/s</td>
-                                    <td><code>13.5 - 16.5</code></td>
-                                    <td><code>4.75 - 5.25</code> (baja) / <code>23.75 - 26.25</code> (alta)</td>
-                                    <td>Flujo de Agua Bajo / Alto</td>
-                                </tr>
-                                <tr>
-                                    <td><code>flood_sensor_status</code></td>
-                                    <td>-</td>
-                                    <td><code>0</code> (Seco)</td>
-                                    <td><code>1</code> (Inundado)</td>
-                                    <td>Sensor de Inundación</td>
-                                </tr>
+                                <tr><td><code>water_pressure_psi</code></td><td>psi</td><td>Presión en la línea de agua.</td></tr>
+                                <tr><td><code>flowmeter_lps</code></td><td>L/s</td><td>Caudal medido en la línea de agua.</td></tr>
+                                <tr><td><code>flood_sensor_status</code></td><td>0/1</td><td>Estado del sensor de inundación (0=Seco, 1=Inundado).</td></tr>
                             </tbody>
                         </table>
                     </details>
@@ -331,33 +213,13 @@
                                 <tr>
                                     <th>Variable</th>
                                     <th>Unidad</th>
-                                    <th>Rango Nominal</th>
-                                    <th>Rango en Falla</th>
-                                    <th>Falla Asociada</th>
+                                    <th>Descripción</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><code>room_temp_control</code></td>
-                                    <td>°C</td>
-                                    <td><code>21.34 - 22.66</code></td>
-                                    <td><code>9.7 - 10.3</code> (baja) / <code>29.1 - 30.9</code> (alta)</td>
-                                    <td>Temperatura de Sala Baja / Alta</td>
-                                </tr>
-                                <tr>
-                                    <td><code>grid_frequency_Hz</code></td>
-                                    <td>Hz</td>
-                                    <td><code>49.95 - 50.05</code></td>
-                                    <td><code>48.95 - 49.04</code> (baja) / <code>50.94 - 51.05</code> (alta)</td>
-                                    <td>Frecuencia de Red Baja / Alta</td>
-                                </tr>
-                                <tr>
-                                    <td><code>room_humidity</code></td>
-                                    <td>%</td>
-                                    <td><code>45 - 55</code></td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
+                                <tr><td><code>room_temp_control</code></td><td>°C</td><td>Temperatura de la sala de control.</td></tr>
+                                <tr><td><code>grid_frequency_Hz</code></td><td>Hz</td><td>Frecuencia de la red eléctrica.</td></tr>
+                                <tr><td><code>room_humidity</code></td><td>%</td><td>Humedad en la sala de control.</td></tr>
                             </tbody>
                         </table>
                     </details>
