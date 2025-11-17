@@ -1,16 +1,13 @@
 from flask import Flask, render_template, request, jsonify
 import threading
-import database as db
 from simulation import simulation_loop
-
-# Inicializar la base de datos al arrancar
-db.init_db()
 
 app = Flask(__name__)
 
 # --- Estado de la Simulación ---
 simulation_thread = None
 simulation_stop_event = threading.Event() # Usar un Event para un control más robusto
+immediate_refresh_event = threading.Event()  # Event to trigger immediate data refresh
 # Dictionary to track multiple simultaneous active events
 active_event = {
     "T3": {},
@@ -26,62 +23,23 @@ def index():
     return render_template('index.html')
 
 # --- Rutas de la API ---
-@app.route('/api/mqtt_configs', methods=['GET'])
-def get_configs():
-    configs = db.get_all_configs()
-    return jsonify(configs)
-
-@app.route('/api/mqtt_configs', methods=['POST'])
-def add_new_config():
-    data = request.get_json()
-    if not all(k in data for k in ['note', 'broker', 'port', 'topic']):
-        return jsonify({"success": False, "error": "Faltan campos requeridos."}), 400
-    
-    result = db.add_config(
-        data['note'],
-        data['broker'],
-        int(data['port']),
-        data['topic'],
-        data.get('username', '') # username es opcional
-    )
-
-    if result["success"]:
-        return jsonify(result), 201
-    else:
-        return jsonify(result), 409 # 409 Conflict por nota duplicada
-
-@app.route('/api/mqtt_configs/<int:config_id>', methods=['DELETE'])
-def delete_config_route(config_id):
-    result = db.delete_config(config_id)
-    if result["success"]:
-        return jsonify(result), 200
-    else:
-        return jsonify(result), 404 # 404 Not Found si el ID no existe
-
 @app.route('/start', methods=['POST'])
 def start_simulation():
-    global simulation_thread, simulation_stop_event
+    global simulation_thread, simulation_stop_event, immediate_refresh_event
     
     data = request.get_json()
-    config_id = data.get('config_id')
     interval = int(data.get('interval', 15))
-
-    if not config_id:
-        return jsonify({"status": "Error", "message": "No se proporcionó un ID de configuración."}), 400
-
-    mqtt_config = db.get_config_by_id(config_id)
-    if not mqtt_config:
-        return jsonify({"status": "Error", "message": f"No se encontró una configuración con ID {config_id}."}), 404
 
     if simulation_thread is None or not simulation_thread.is_alive():
         simulation_stop_event.clear() # Limpiar el evento de detención para la nueva ejecución
+        immediate_refresh_event.clear()  # Clear the immediate refresh event
         simulation_thread = threading.Thread(
             target=simulation_loop, 
-            args=(simulation_stop_event, active_event, mqtt_config, interval)
+            args=(simulation_stop_event, active_event, interval, immediate_refresh_event)
         )
         simulation_thread.daemon = True
         simulation_thread.start()
-        return jsonify({"status": "Running", "message": f"Simulación iniciada con la configuración '{mqtt_config['note']}'."})
+        return jsonify({"status": "Running", "message": "Simulación iniciada."})
     
     return jsonify({"status": "Running", "message": "La simulación ya está en ejecución."})
 
@@ -97,7 +55,7 @@ def stop_simulation():
 
 @app.route('/trigger_event', methods=['POST'])
 def trigger_event():
-    global active_event
+    global active_event, immediate_refresh_event
     data = request.get_json()
     event_name = data.get("event")
     
@@ -112,6 +70,8 @@ def trigger_event():
         })
         msg = "Operación normal - todos los eventos desactivados."
         print(msg)
+        # Trigger immediate refresh after clearing events
+        immediate_refresh_event.set()
         return jsonify({"status": "Running", "message": msg})
 
     try:
@@ -129,6 +89,8 @@ def trigger_event():
             msg = f"Evento '{event_type}' activado para el objetivo '{target}'."
         
         print(msg)
+        # Trigger immediate refresh after changing event status
+        immediate_refresh_event.set()
         return jsonify({"status": "Running", "message": msg})
     except (ValueError, KeyError) as e:
         msg = f"Formato de evento inválido o clave no encontrada: {event_name}"
@@ -146,6 +108,21 @@ def get_status():
         "simulation_running": simulation_running,
         "active_events": active_event
     })
+
+@app.route('/trigger_immediate_refresh', methods=['POST'])
+def trigger_immediate_refresh():
+    global immediate_refresh_event
+    try:
+        immediate_refresh_event.set()
+        return jsonify({
+            "status": "success",
+            "message": "Immediate refresh triggered"
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True, use_reloader=False)

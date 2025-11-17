@@ -1,44 +1,45 @@
- Paso 1: Crear el archivo de servicio
+Paso 1: Crear el archivo de servicio
 
-  Ejecuta este comando para crear y abrir el archivo de servicio con el editor nano:
+Ejecuta este comando para crear y abrir el archivo de servicio con el editor nano:
 
-   1 sudo nano /etc/systemd/system/subestacion.service
+1 sudo nano /etc/systemd/system/subestacion.service
 
-  Paso 2: Pegar el contenido
+Paso 2: Pegar el contenido
 
-  Copia el siguiente texto y pégalo dentro del editor nano:
+Copia el siguiente texto y pégalo dentro del editor nano:
 
-    1 [Unit]
-    2 Description=Servicio de la Subestacion
-    3 After=network.target
-    4
-    5 [Service]
-    6 User=pi
-    7 WorkingDirectory=/home/pi/Documents/subestacion
-    8 ExecStart=/usr/bin/python3 app.py
-    9 Restart=always
-   10
-   11 [Install]
-   12 WantedBy=multi-user.target
+1 [Unit]
+2 Description=Servicio de la Subestacion
+3 After=network.target
+4
+5 [Service]
+6 User=pi
+7 WorkingDirectory=/home/pi/Documents/subestacion
+8 ExecStart=/usr/bin/python3 app.py
+9 Restart=always
+10
+11 [Install]
+12 WantedBy=multi-user.target
 
-  Guarda el archivo y sal del editor (presiona Ctrl+X, luego Y, y finalmente Enter).
+Guarda el archivo y sal del editor (presiona Ctrl+X, luego Y, y finalmente Enter).
 
-  Paso 3: Habilitar e iniciar el servicio
+Paso 3: Habilitar e iniciar el servicio
 
-  Ahora, ejecuta los siguientes comandos para que systemd reconozca el nuevo servicio, lo habilite para el arranque y lo inicie inmediatamente:
+Ahora, ejecuta los siguientes comandos para que systemd reconozca el nuevo servicio, lo habilite para el arranque y lo inicie inmediatamente:
 
-   1 sudo systemctl daemon-reload
-   2 sudo systemctl enable subestacion.service
-   3 sudo systemctl start subestacion.service
+1 sudo systemctl daemon-reload
+2 sudo systemctl enable subestacion.service
+3 sudo systemctl start subestacion.service
 
-  ¡Y eso es todo! Tu aplicación ya está corriendo en segundo plano y se iniciará automáticamente cada vez que enciendas tu Raspberry Pi.
+¡Y eso es todo! Tu aplicación ya está corriendo en segundo plano y se iniciará automáticamente cada vez que enciendas tu Raspberry Pi.
 
-  Comandos útiles:
+Comandos útiles:
 
-   * Para ver el estado del servicio:
-   1     sudo systemctl status subestacion.service
-   * Para detener el servicio:
+* Para ver el estado del servicio:
+     sudo systemctl status subestacion.service
 
-   1     sudo systemctl stop subestacion.service
-   * Para ver los logs de tu aplicación:
-   1     sudo journalctl -u subestacion.service -f
+* Para detener el servicio:
+     sudo systemctl stop subestacion.service
+	 
+* Para ver los logs de tu aplicación:
+     sudo journalctl -u subestacion.service -f
